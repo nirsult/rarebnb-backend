@@ -101,7 +101,9 @@ async function add(order, loggedInUser) {
     stay: {
       _id: existingStay._id,
       name: existingStay.name,
-      price: existingStay.price
+      price: existingStay.price,
+      imgUrl: existingStay.imgUrls[0],
+      location: existingStay.loc
     },
     msgs: [],
     status: 'pending'
@@ -127,19 +129,39 @@ async function update(order, loggedInUser) {
     const collection = await dbService.getCollection('order')
     const existingOrder = await collection.findOne(criteria)
 
+    const isHost = loggedInUser._id === existingOrder.host._id
+    const isGuest = loggedInUser._id === existingOrder.guest._id
+    const isAdmin = loggedInUser.isAdmin
+
     if (existingOrder.status !== 'pending') {
       logger.error(`cannot update processed order ${order._id}`)
       throw new Error(`Can't update order`)
     }
 
     const prevStatus = existingOrder.status
-    const orderToSave = { status, msgs }
+    const orderToSave = {}
 
-    if (loggedInUser.isAdmin || loggedInUser._id === existingOrder.guest._id) {
+    if (status && status !== existingOrder.status) {
+      const allowedToChangeStatus =
+        (isHost && ['approved', 'rejected'].includes(status)) ||
+        ((isGuest || isAdmin) && status === 'cancelled')
+
+      if (!allowedToChangeStatus) {
+        throw new Error('You are not allowed to change the status of this order')
+      }
+
+      orderToSave.status = status
+    }
+
+    if (isAdmin || isGuest) {
       orderToSave.totalPrice = totalPrice
       orderToSave.startDate = startDate
       orderToSave.endDate = endDate
       orderToSave.guestCountMap = guestCountMap
+    }
+
+    if (msgs) {
+      orderToSave.msgs = msgs
     }
 
     await collection.updateOne(criteria, { $set: orderToSave })
