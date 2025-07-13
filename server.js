@@ -1,3 +1,5 @@
+import './config/setup.env.js'
+
 import http from 'http'
 import path from 'path'
 import cors from 'cors'
@@ -12,6 +14,7 @@ import { orderRoutes } from './api/order/order.routes.js'
 import { setupSocketAPI } from './services/socket.service.js'
 
 import { setupAsyncLocalStorage } from './middlewares/setupAls.middleware.js'
+
 
 const app = express()
 const server = http.createServer(app)
