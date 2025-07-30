@@ -77,12 +77,6 @@ async function add(order, loggedInUser) {
   const { stayId, startDate, endDate, guestCountMap, totalPrice } = order
   const existingStay = await stayService.getById(stayId)
 
-  //////////////////////////////////////////////! only until we have frontend users:
-  if (!loggedInUser) {
-    const collection = await dbService.getCollection('user')
-    loggedInUser = await collection.findOne({ _id: ObjectId.createFromHexString('6828ae1ccc805aefb7c23ca7') })
-  }
-
   const orderToAdd = {
     host: {
       _id: existingStay.host._id,
