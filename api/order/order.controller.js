@@ -3,10 +3,12 @@ import { socketService } from '../../services/socket.service.js'
 import { orderService } from './order.service.js'
 
 export async function getOrders(req, res) {
-  const { guestId, hostId, sortField = '_id', sortDir = -1 } = req.query
+  const { guestId, hostId, status, includePast, sortField = '_id', sortDir = -1 } = req.query
   const filterBy = { sortField, sortDir: +sortDir }
   if (guestId) filterBy.guestId = guestId
   if (hostId) filterBy.hostId = hostId
+  if (status) filterBy.status = status
+  if (includePast) filterBy.includePast = includePast
 
   try {
     const orders = await orderService.query(filterBy)
@@ -31,9 +33,6 @@ export async function getOrderById(req, res) {
 export async function addOrder(req, res) {
   const { loggedInUser } = req
   const order = req.body
-
-  console.log('loggedInUser:', loggedInUser)
-  console.log('order:', order)
 
   try {
     const addedOrder = await orderService.add(order, loggedInUser)

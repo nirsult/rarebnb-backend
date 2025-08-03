@@ -6,8 +6,6 @@ import { dbService } from '../../services/db.service.js'
 import { asyncLocalStorage } from '../../services/als.service.js'
 import { stayService } from '../stay/stay.service.js'
 
-const PAGE_SIZE = 3
-
 export const orderService = {
   remove,
   query,
@@ -24,10 +22,6 @@ async function query(filterBy = {}) {
   try {
     const collection = await dbService.getCollection('order')
     var orderCursor = await collection.find(criteria, { sort })
-
-    // if (filterBy.pageIdx !== undefined) {
-    //   orderCursor.skip(filterBy.pageIdx * PAGE_SIZE).limit(PAGE_SIZE)
-    // }
 
     const orders = await orderCursor.toArray()
     return orders
@@ -201,13 +195,19 @@ async function removeOrderMsg(orderId, msgId) {
 
 function _buildCriteria(filterBy) {
   const criteria = {}
-  const { guestId, hostId } = filterBy
+  const { guestId, hostId, status, includePast } = filterBy
 
   if (guestId) {
     criteria['guest._id'] = guestId
   }
   if (hostId) {
     criteria['host._id'] = hostId
+  }
+  if (status && status !== 'all') {
+    criteria.status = status
+  }
+  if (!includePast || includePast === 'false') {
+    criteria['startDate'] = { $gte: new Date().toISOString() }
   }
 
   return criteria
