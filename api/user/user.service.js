@@ -10,6 +10,7 @@ export const userService = {
   remove, // Delete (remove user)
   query, // List (of users)
   getByUsername, // Used for Login
+  updateWishlist,
 }
 
 async function query(filterBy = {}) {
@@ -91,6 +92,19 @@ async function update(user) {
     return userToSave
   } catch (err) {
     logger.error(`cannot update user ${user._id}`, err)
+    throw err
+  }
+}
+
+async function updateWishlist(userId, wishlist) {
+  try {
+    const collection = await dbService.getCollection('user')
+    await collection.updateOne(
+      { _id: userId },
+      { $set: { wishlist } }
+    )
+  } catch (err) {
+    logger.error(`Failed to update wishlist for user ${userId}`)
     throw err
   }
 }

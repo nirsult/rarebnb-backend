@@ -68,3 +68,30 @@ export async function addUser(req, res) {
     res.status(400).send({ err: 'Failed to add user' })
   }
 }
+
+export async function toggleWishlist(req, res) {
+  try {
+    const userId = req.loggedInUser._id
+    const { stayId } = req.body
+
+    if (!userId || !stayId) {
+      return res.status(400).send('Missing userId or stayId')
+    }
+
+    const user = await userService.getById(userId)
+    if (!user) return res.status(404).send('User not found')
+
+    const idx = user.wishlist.findIndex(id => id === stayId)
+
+    if (idx !== -1) {
+      user.wishlist.splice(idx, 1)
+    } else {
+      user.wishlist.push(stayId)
+    }
+    await userService.updateWishlist(user._id, user.wishlist)
+    res.send(user)
+  } catch (err) {
+    logger.error('Failed to toggle stay in the wishlist', err)
+    res.status(400).send({ err: 'Failed to change the wishlist' })
+  }
+}
