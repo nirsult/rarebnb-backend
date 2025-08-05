@@ -7,7 +7,8 @@ export async function getStays(req, res) {
     // sortField: req.query.sortField || '',
     // sortDir: req.query.sortDir || 1,
     pageIdx: req.query.pageIdx,
-    country: req.query.country
+    country: req.query.country,
+    ids: req.query.ids || []
   }
 
   try {

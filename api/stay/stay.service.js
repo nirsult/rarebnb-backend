@@ -151,7 +151,16 @@ async function removeStayMsg(stayId, msgId) {
 
 function _buildCriteria(filterBy) {
   const criteria = {}
+
+  if (filterBy.ids && filterBy.ids.length) {
+    let ids = filterBy.ids
+    if (!Array.isArray(ids)) ids = [ids]
+    criteria._id = { $in: ids.map(id => new ObjectId(id)) }
+    return criteria
+  }
+
   if (filterBy.country) criteria['loc.country'] = { $regex: filterBy.country, $options: 'i' }
+
   return criteria
 }
 
